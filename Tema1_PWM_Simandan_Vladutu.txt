@@ -1,0 +1,81 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+#define MAXVAL_TIMER1 32767
+
+void timer1_pwm()
+{			
+	TCNT1 = 0;
+	TCCR1A = (1 << COM1A1) | (1 << COM1B1) |(1<<WGM11);
+	TCCR1B = (1<<WGM13)|(1 << WGM12) | (1 << CS11);
+	ICR1=MAXVAL_TIMER1;
+	OCR1A = 0;
+	OCR1B = 0;
+}
+
+void fw()
+{
+	OCR1A = 32767;
+	OCR1B = 32767;
+	PORTB &= ~0x30;
+	TCCR1A&=~((1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1<< COM1B0));
+	TCCR1A |= (1 << COM1A1) | (1 << COM1B1);
+}
+
+void bw()
+{
+	OCR1A = 32767;
+	OCR1B = 32767;
+	PORTB |= 0x30;
+	TCCR1A&=~((1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1<< COM1B0));
+	TCCR1A |= (1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1<< COM1B0);
+}
+
+void curba(unsigned int engine_left,unsigned int engine_right)
+{	
+	OCR1A = (32767/100)*engine_left;
+	OCR1B = (32767/100)*engine_right;
+	PORTB &= ~0x30;
+	TCCR1A&=~((1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1<< COM1B0));
+	TCCR1A |= (1 << COM1A1) | (1 << COM1B1);
+}
+
+void oprire()
+{
+	OCR1A=0;
+	OCR1B=0;
+	PORTB&=~0X30;
+	TCCR1A&=~((1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1<< COM1B0));
+}
+
+void dreapta_pe_loc()
+{
+	OCR1A = 20000;
+	OCR1B = 20000;
+	PORTB |=0X20;
+	PORTB&=~0x10;
+	TCCR1A&=~((1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1<< COM1B0));
+	TCCR1A |= (1 << COM1A1) | (1<<COM1B0)|(1 << COM1B1);
+}
+
+void stanga_pe_loc()
+{
+	OCR1A = 20000;
+	OCR1B = 20000;
+	PORTB |=0x10;
+	PORTB&=~0x20;
+	TCCR1A&=~((1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1<< COM1B0));
+	TCCR1A |= (1<<COM1A0)|(1 << COM1A1) | (1 << COM1B1);
+}
+
+int main()
+{
+	cli();
+	timer1_pwm();
+	DDRB = 0xFF;
+	sei();
+	stop();
+	do{
+	}while(1);
+	return 0;
+}
